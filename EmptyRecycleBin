@@ -1,0 +1,34 @@
+public class EmptyRecycleBin {
+    
+    @InvocableMethod(label='Empty RecycleBin' 
+                     description='Permanently delete the records from the Recycle Bin.'
+                     iconName='slds:standard:record_delete'
+                     category = 'Custom Apex Actions')
+    
+    public static void execute(List<Requests> requestList) {
+        
+        List<SObject> recordstoDelete = New List<SObject>();
+        
+        for (Requests req: requestList) {
+            if(req.obj != null){
+                recordstoDelete.add(req.obj);
+            }
+            if(req.listofSObjects != null){
+                recordstoDelete.addAll(req.listofSObjects);
+            }
+        }
+        
+        if(recordstoDelete.size()>0){
+            Database.emptyRecycleBin(recordstoDelete);
+        }
+    }
+    
+    public class Requests{
+        
+        @InvocableVariable (description ='Accept one record of an SObject type.' required=false)
+        public SObject obj;
+        
+        @InvocableVariable (description ='Accept multiple records of an SObject type.' required=false)
+        public List<SObject> listofSObjects;
+    }
+}

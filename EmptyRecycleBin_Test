@@ -1,0 +1,64 @@
+@isTest(SeeAllData=false)
+public class EmptyRecycleBin_Test {
+    
+    @TestSetup
+    static void makeTestData() {
+        
+        List<Lead> leads = new List<Lead>();
+        
+        for(Integer i=0;i<400;i++) {
+            Lead leadToCreate = new Lead();
+            List<Id> Ids = New List<Id>();
+            leadToCreate.FirstName ='Test'+i;            
+            leadToCreate.LastName ='Test'+i;
+            leadToCreate.Company ='Test'+i;
+            leadToCreate.LeadSource ='Web';
+            leadToCreate.Rating ='Cold';
+            leadToCreate.Status ='Open - Not Contacted';
+            leadToCreate.Email ='';
+            leadToCreate.CreatedDate = date.today(); 
+            leads.add(leadToCreate);
+        }
+        insert leads; 
+    }
+    
+    @isTest 
+    static void deleteMultipleRecords () {
+        
+        List<Lead> leadsToDelete = [select id from Lead where Email = ''];
+        Delete leadsToDelete;
+        
+        Test.startTest();
+        
+        List<EmptyRecycleBin.Requests>  requests = New List<EmptyRecycleBin.Requests>();
+        EmptyRecycleBin.Requests request = new EmptyRecycleBin.Requests();
+        request.listofSObjects = leadsToDelete;
+        requests.add (request);
+        EmptyRecycleBin.execute(requests);
+        
+        Test.stopTest ();
+        
+        List<Lead> deletedLeads = [SELECT Id FROM Lead WHERE IsDeleted = TRUE ALL ROWS];
+        Assert.areEqual(400, deletedLeads.size(), 'Deletion was succesful');
+    }
+    
+    @isTest 
+    static void deleteSingleRecords () {
+        
+        Lead leadsToDelete = [select id from Lead where Email = '' Limit 1];
+        Delete leadsToDelete;
+        
+        Test.startTest();
+        
+        List<EmptyRecycleBin.Requests>  requests = New List<EmptyRecycleBin.Requests>();
+        EmptyRecycleBin.Requests request = new EmptyRecycleBin.Requests();
+        request.obj = leadsToDelete;
+        requests.add (request);
+        EmptyRecycleBin.execute(requests);
+        
+        Test.stopTest ();
+        
+        List<Lead> deletedLeads = [SELECT Id FROM Lead WHERE IsDeleted = TRUE ALL ROWS];
+        Assert.areEqual(1, deletedLeads.size(), 'Deletion was succesful');
+    }
+}
